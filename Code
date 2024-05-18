@@ -1,0 +1,685 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <map>
+using namespace std;
+#include <cstdlib>
+
+class Student;
+class Course;
+class Enrollment;
+
+class Enrollment {
+private:
+    Course* course;
+    Student* student;
+    string status;
+    float grade;
+
+public:
+    Enrollment(Course* c, Student* s, string st = "enrolled", float g = 0.0f) : course(c), student(s), status(st), grade(g) {}
+
+
+    Course* getCourse() const {
+        return course;
+    }
+
+    Student* getStudent() const {
+        return student;
+    }
+
+    string getStatus() const {
+        return status;
+    }
+
+    float getGrade() const {
+        return grade;
+    }
+
+    void updateStatus(const string& newStatus) {
+        status = newStatus;
+    }
+
+    void updateGrade(float newGrade) {
+        grade = newGrade;
+    }
+};
+
+// class account
+class Account {
+private:
+    int AccountId;
+    string password;  
+    string username;
+    string role; 
+    string profileDetails; 
+
+public:
+    Account() : AccountId(0), password(""), username(""), role(""), profileDetails("") {}
+    Account(int a, string p, string u, string r, string pd) : AccountId(a), password(p), username(u), role(r), profileDetails(pd) {}
+
+    virtual ~Account() ;
+
+    bool validatePIN(const string& pin) const {
+        return pin == password;
+    }
+
+    void setAccountId(int a) {
+        AccountId = a;
+    }
+    void setPassword(const string& p) {
+        password = p;
+    }
+    void setUsername(const string& u) {
+        username = u;
+    }
+    void setRole(const string& r) {
+        role = r;
+    }
+    void setProfileDetails(const string& pd) {
+        profileDetails = pd;
+    }
+    int getAccountId() const {
+        return AccountId;
+    }
+    string getPassword() const {
+        return password;
+    }
+    string getUsername() const {
+        return username;
+    }
+    string getRole() const {
+        return role;
+    }
+    string getProfileDetails() const {
+        return profileDetails;
+    }
+};
+
+class DataBase {
+public:
+    DataBase() {
+        accounts.push_back(Account(2315, "0000", "Naya Alibrahim", "Student", "Computer Science Major"));
+    }
+
+
+    bool authenticateUser(int AccountId, const string& Pin) {
+        Account* userAccountPtr = getAccount(AccountId);
+        return userAccountPtr != nullptr && userAccountPtr->validatePIN(Pin);
+    }
+
+    Account* getAccount(int AccountId) {
+        for (auto& account : accounts) {
+            if (account.getAccountId() == AccountId) {
+                return &account;
+            }
+        }
+        return nullptr;
+    }
+
+    void addCourse(Course* course) {
+    }
+
+
+    class Course {
+    private :
+        string title;
+        string description;
+        string schedule;
+        int capacity;
+        int enrolledStudents;
+        vector<Enrollment*> enrollments; 
+
+    public:
+        Course(string t, string d, string s, int c) : title(t), description(d), schedule(s), capacity(c), enrolledStudents(0) {}
+
+
+        string getCourseTitle() const { return title; }
+        string getCourseDescription() const { return description; }
+        string getSchedule() const { return schedule; }
+        int getCapacity() const { return capacity; }
+        int getEnrolledStudents() const { return enrolledStudents; }
+
+
+
+        void createCourse(string title, string description, string schedule, int capacity) {
+            this->title = title;
+            this->description = description;
+            this->schedule = schedule;
+            this->capacity = capacity;
+        }
+
+        void updateCourse(string title, string description, string schedule, int capacity) {
+            this->title = title;
+            this->description = description;
+            this->schedule = schedule;
+            this->capacity = capacity;
+        }
+    };
+
+    void updateCourse(Course* course) {
+        auto it = find_if(courses.begin(), courses.end(), [course](Course* c) { return c->getCourseTitle() == course->getCourseTitle(); });
+        if (it != courses.end()) {
+            *it = course;
+        }
+    }
+
+    void deleteCourse(const string& title) {
+        auto it = remove_if(courses.begin(), courses.end(), [&title](Course* c) { return c->getCourseTitle() == title; });
+        courses.erase(it, courses.end());
+    }
+
+    void displayCourses() {
+        for (auto& course : courses) {
+            cout << "Course: " << course->getCourseTitle() << endl;
+        }
+    }
+
+    Course* getCourse(const string& title) {
+        for (auto& course : courses) {
+            if (course->getCourseTitle() == title) {
+                return course;
+            }
+        }
+        return nullptr;
+    }
+
+    bool updateGrade(string basicString, string basicString1, float d) {
+        return false;
+    }
+
+private:
+    vector<Account> accounts;
+    vector<Course*> courses;
+};
+
+
+class Course {
+private :
+    string title;
+    string description;
+    string schedule;
+    int capacity;
+    int enrolledStudents;
+    vector<Enrollment*> enrollments;
+
+public:
+    Course(string t, string d, string s, int c) : title(t), description(d), schedule(s), capacity(c), enrolledStudents(0) {}
+
+    string getCourseTitle() const { return title; }
+    string getCourseDescription() const { return description; }
+    string getSchedule() const { return schedule; }
+    int getCapacity() const { return capacity; }
+    int getEnrolledStudents() const { return enrolledStudents; }
+
+    bool enrollStudent(Student* student) {
+        if (enrolledStudents < capacity) {
+            Enrollment* newEnrollment = new Enrollment(this, student);
+            enrollments.push_back(newEnrollment);
+            ++enrolledStudents;
+            return true;
+        }
+        return false;
+    }
+
+    void createCourse(string title, string description, string schedule, int capacity) {
+        this->title = title;
+        this->description = description;
+        this->schedule = schedule;
+        this->capacity = capacity;
+    }
+
+    void updateCourse(string title, string description, string schedule, int capacity) {
+        this->title = title;
+        this->description = description;
+        this->schedule = schedule;
+        this->capacity = capacity;
+    }
+};
+
+
+class SpecialCourse : public Course {
+private:
+    string specialType;
+    string enrollmentCriteria;
+
+public:
+    SpecialCourse(string title, string description, string schedule, int capacity,
+                  string specialType, string enrollmentCriteria)
+            : Course(title, description, schedule, capacity), specialType(specialType),
+              enrollmentCriteria(enrollmentCriteria) {}
+
+    string getSpecialType() { return specialType; }
+
+    string getEnrollmentCriteria() { return enrollmentCriteria; }
+};
+
+class User {
+protected:
+    string name;
+    string email;
+    int userId;
+    string role;
+    string profileDetails;
+
+public:
+    User(string name, string email, int userId, string role, string profileDetails)
+            : name(name), email(email), userId(userId), role(role), profileDetails(profileDetails) {}
+    virtual void displayInfo() = 0; 
+
+    string getRole() const { return role; }
+    string getProfileDetails() const { return profileDetails; }
+    string getName() const { return name; } 
+    string getEmail() const { return email; } 
+    int getUserId() const { return userId; }
+};
+
+class Student : public User {
+private:
+    vector<Course*> enrolledCourses;
+
+public:
+    int*viewGradeReport() ;
+    int*dropCourse () ;
+
+    Student(string name, string email, int userId, string role, string profileDetails)
+            : User(name, email, userId, role, profileDetails) {}
+
+    bool enrollCourse(Course* course) {
+        if (course->enrollStudent(this)) {
+            enrolledCourses.push_back(course);
+            return true;
+        }
+        return false;
+    }
+
+    void displayInfo() override {
+        cout << "Student Name: " << name << ", Email: " << email << ", ID: " << userId << endl;
+        cout << "Enrolled Courses: " << endl;
+        for (auto& course : enrolledCourses) {
+            cout << course->getCourseTitle() << endl;
+        }
+    }
+
+    int *dropCourse(string basicString) {
+        return nullptr;
+    }
+};
+
+class AdministrativeStaff : public User {
+public:
+    AdministrativeStaff(string name, string email, int userId, string role, string profileDetails)
+            : User(name, email, userId, role, profileDetails) {}
+
+    void displayInfo() override {
+        cout << "Administrative Staff Name: " << name << ", Email: " << email << ", ID: " << userId << endl;
+    }
+};
+
+class FacultyAdvisor : public User {
+private:
+    vector<Student*> advisees;
+
+public:
+    FacultyAdvisor(string name, string email, int userId, string role, string profileDetails)
+            : User(name, email, userId, role, profileDetails) {}
+
+    void addAdvisee(Student* student) {
+        advisees.push_back(student);
+    }
+
+    void displayInfo() override {
+        cout << "Faculty Advisor Name: " << name << ", Email: " << email << ", ID: " << userId << endl;
+        cout << "Advisees: " << endl;
+        for (auto& student : advisees) {
+            cout << student->getName() << " (" << student->getEmail() << ")" << endl;
+        }
+    }
+};
+
+
+
+class Schedule {
+private:
+    string timing;
+    string location;
+
+public:
+    Schedule(string t, string l) : timing(t), location(l) {}
+
+    string getTiming() const {
+        return timing;
+    }
+
+    string getLocation() const {
+        return location;
+    }
+};
+
+class CourseSchedule : public Schedule {
+private:
+    Course* course;
+
+public:
+    CourseSchedule(Course* c, string t, string l) : Schedule(t, l), course(c) {}
+
+    Course* getCourse() const {
+        return course;
+    }
+
+    void displayCourseDetails() const {
+        cout << "Course Title: " << course->getCourseTitle() << endl;
+        cout << "Description: " << course->getCourseDescription() << endl;
+        cout << "Timing: " << getTiming() << endl;
+        cout << "Location: " << getLocation() << endl;
+        cout << "Current Enrollment: " << course->getEnrolledStudents() << "/" << course->getCapacity() << endl;
+    }
+};
+
+class Requirement {
+private:
+    vector<string> prerequisites;
+    string eligibilityCriteria;
+
+public:
+    Requirement(const vector<string>& prereqs, const string& criteria)
+            : prerequisites(prereqs), eligibilityCriteria(criteria) {}
+
+    vector<string> getPrerequisites() const {
+        return prerequisites;
+    }
+
+    string getEligibilityCriteria() const {
+        return eligibilityCriteria;
+    }
+};
+
+class SystemAccess {
+private:
+    vector<string> permissions;
+
+public:
+    SystemAccess(const vector<string>& initialPermissions) : permissions(initialPermissions) {}
+
+    void grantPermission(const string& permission) {
+
+        if (find(permissions.begin(), permissions.end(), permission) == permissions.end()) {
+            permissions.push_back(permission);
+            cout << "Permission '" << permission << "' granted." << endl;
+        } else {
+            cout << "Permission '" << permission << "' is already granted." << endl;
+        }
+    }
+
+    void revokePermission(const string& permission) {
+        auto it = find(permissions.begin(), permissions.end(), permission);
+        if (it != permissions.end()) {
+            permissions.erase(it);
+            cout << "Permission '" << permission << "' revoked." << endl;
+        } else {
+            cout << "Permission '" << permission << "' not found." << endl;
+        }
+    }
+
+    vector<string> getPermissions() const {
+        return permissions;
+    }
+};
+
+class GradeReport {
+private:
+    vector<pair<Student*, float>> gradeList;
+
+public:
+    GradeReport() {}
+
+    void generateReport() {
+        cout << "Grade Report:" << endl;
+        for (auto& entry : gradeList) {
+            cout << "Student ID: " << entry.first->getUserId() << ", Grade: " << entry.second << endl;
+        }
+    }
+
+    void provideFeedback(Student* student, const string& feedback) {
+        cout << "Feedback for Student ID " << student->getUserId() << ": " << feedback << endl;
+    }
+
+    void trackProgress(Student* student) {
+        auto it = find_if(gradeList.begin(), gradeList.end(), [student](const pair<Student*, float>& entry) {
+            return entry.first == student;
+        });
+        if (it != gradeList.end()) {
+            cout << "Tracking Progress for Student ID " << student->getUserId() << ": Current Grade: " << it->second << endl;
+        } else {
+            cout << "No grade record found for Student ID " << student->getUserId() << endl;
+        }
+    }
+
+    vector<pair<Student*, float>> getGradeList() const {
+        return gradeList;
+    }
+
+    void addGrade(Student* student, float grade) {
+        auto it = find_if(gradeList.begin(), gradeList.end(), [student](const pair<Student*, float>& entry) {
+            return entry.first == student;
+        });
+        if (it != gradeList.end()) {
+            it->second = grade; 
+        } else {
+            gradeList.push_back(make_pair(student, grade)); // Add new grade entry
+        }
+    }
+};
+
+class Notification {
+private:
+    string message;
+    vector<User*> recipients;
+    map<User*, string> notificationSettings; 
+
+public:
+    Notification(string msg) : message(msg) {}
+
+    void addRecipient(User* user) {
+        recipients.push_back(user);
+        notificationSettings[user] = "default";
+    }
+
+    string getMessage() const {
+        return message;
+    }
+
+    vector<User*> getRecipients() const {
+        return recipients;
+    }
+
+    void sendNotification() {
+        for (User* user : recipients) {
+            cout << "Sending notification to User ID: " << user->getUserId() << " - " << message << endl;
+        }
+    }
+
+    void manageNotificationSettings(User* user, const string& settings) {
+        if (notificationSettings.find(user) != notificationSettings.end()) {
+            notificationSettings[user] = settings;
+            cout << "Notification settings updated for User ID: " << user->getUserId() << " - Settings: " << settings << endl;
+        } else {
+            cout << "User ID: " << user->getUserId() << " not found in notification settings." << endl;
+        }
+    }
+};
+
+int main() {
+    int choice;
+    DataBase db; 
+    int userId;
+    string userPin;
+    bool authenticated = false;
+    Account* currentUser;
+
+    while (true) {
+        cout << "\n========================================\n";
+        cout << "Welcome to the Course Registration System\n";
+        cout << "========================================\n";
+        if (!authenticated) {
+            cout << "1. Login\n";
+            cout << "9. Exit\n";
+        } else {
+            cout << "2. Register Course\n";
+            cout << "3. Update Course\n";
+            cout << "4. Delete Course\n";
+            cout << "5. Enroll in Course\n";
+            cout << "6. Drop Course\n";
+            cout << "7. Display All Courses\n";
+            cout << "8. Display My Courses\n";
+            cout << "10. Manage Grades (Faculty)\n";
+            cout << "11. View Grade Report (Student)\n";
+            cout << "12. Logout\n";
+        }
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter User ID: ";
+                cin >> userId;
+                cout << "Enter PIN: ";
+                cin >> userPin;
+                authenticated = db.authenticateUser(userId, userPin);
+                if (authenticated) {
+                    cout << "Login successful!\n";
+                    currentUser = db.getAccount(userId);
+                } else {
+                    cout << "Login failed. Please try again.\n";
+                }
+                break;
+            case 2: 
+                if (currentUser->getRole() == "Administrator") {
+                    string title, description, schedule;
+                    int capacity;
+                    cout << "Enter course title: ";
+                    cin.ignore();
+                    getline(cin, title);
+                    cout << "Enter course description: ";
+                    getline(cin, description);
+                    cout << "Enter course schedule: ";
+                    getline(cin, schedule);
+                    cout << "Enter course capacity: ";
+                    cin >> capacity;
+                    Course* newCourse = new Course(title, description, schedule, capacity);
+                    db.addCourse(newCourse);
+                    cout << "Course registered successfully.\n";
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 3: 
+                if (currentUser->getRole() == "Administrator") {
+                    string title, description, schedule;
+                    int capacity;
+                    cout << "Enter the title of the course to update: ";
+                    cin.ignore();
+                    getline(cin, title);
+                    cout << "Enter new course description (leave blank to not change): ";
+                    getline(cin, description);
+                    cout << "Enter new course schedule (leave blank to not change): ";
+                    getline(cin, schedule);
+                    cout << "Enter new course capacity (0 to not change): ";
+                    cin >> capacity;
+                    Course* updatedCourse = new Course(title, description, schedule, capacity);
+                    db.updateCourse(reinterpret_cast<DataBase::Course *>(updatedCourse));
+                    cout << "Course updated successfully.\n";
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 4: 
+                if (currentUser->getRole() == "Administrator") {
+                    string title;
+                    cout << "Enter the title of the course to delete: ";
+                    cin.ignore();
+                    getline(cin, title);
+                    db.deleteCourse(title);
+                    cout << "Course deleted successfully.\n";
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 5: 
+                if (currentUser->getRole() == "Student") {
+                    string courseTitle;
+                    cout << "Enter course title to enroll: ";
+                    cin.ignore();
+                    getline(cin, courseTitle);
+                    Course* course = reinterpret_cast<Course *>(db.getCourse(courseTitle));
+                    if (course && dynamic_cast<Student*>(currentUser)->enrollCourse(course)) {
+                        cout << "Enrolled in course successfully.\n";
+                    } else {
+                        cout << "Failed to enroll in course.\n";
+                    }
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 6:
+                if (currentUser->getRole() == "Student") {
+                    string courseTitle;
+                    cout << "Enter course title to drop: ";
+                    cin.ignore();
+                    getline(cin, courseTitle);
+                    if (dynamic_cast<Student*>(currentUser)->dropCourse(courseTitle)) {
+                        cout << "Dropped course successfully.\n";
+                    } else {
+                        cout << "Failed to drop course.\n";
+                    }
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 7: 
+                db.displayCourses();
+                break;
+            case 8: 
+                dynamic_cast<Student*>(currentUser)->displayInfo();
+                break;
+            case 9: 
+                cout << "Exiting system.\n";
+                return 0; 
+            case 10: 
+                if (currentUser->getRole() == "Faculty") {
+                    string courseTitle, studentId;
+                    float grade;
+                    cout << "Enter course title: ";
+                    cin.ignore();
+                    getline(cin, courseTitle);
+                    cout << "Enter student ID: ";
+                    getline(cin, studentId);
+                    cout << "Enter new grade: ";
+                    cin >> grade;
+                    if (db.updateGrade(courseTitle, studentId, grade)) {
+                        cout << "Grade updated successfully.\n";
+                    } else {
+                        cout << "Failed to update grade.\n";
+                    }
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 11: 
+                if (currentUser->getRole() == "Student") {
+                    dynamic_cast<Student*>(currentUser)->viewGradeReport();
+                } else {
+                    cout << "Unauthorized access.\n";
+                }
+                break;
+            case 12: 
+                authenticated = false;
+                cout << "Logged out successfully.\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+                break;
+        }
+    }
+}
